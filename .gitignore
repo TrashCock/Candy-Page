@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Claude Code worktrees & session data
+.claude/
+
+# Build output (remove this line if you intentionally commit dist/)
+# dist/
+
+# Vite
+*.local
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
