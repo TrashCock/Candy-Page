@@ -25,6 +25,16 @@ html, body, #root {
   color: var(--text);
   font-family: var(--font-body);
   cursor: crosshair;
+  /* Prevent iOS text size inflation */
+  -webkit-text-size-adjust: 100%;
+  /* Prevent pull-to-refresh / bounce on mobile */
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+/* Restore tap highlight removal globally */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Scanline overlay */
@@ -112,4 +122,14 @@ canvas {
 @keyframes autoProgress {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
+}
+
+/* Mobile: use pointer cursor for tap targets */
+@media (hover: none) and (pointer: coarse) {
+  html, body, #root {
+    cursor: default;
+  }
+  button, a {
+    cursor: pointer;
+  }
 }

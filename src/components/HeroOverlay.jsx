@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useScene, SCENES } from '../SceneContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 function useTypewriter(text, speed = 45, delay = 800) {
   const ref = useRef(null)
@@ -20,51 +21,42 @@ function useTypewriter(text, speed = 45, delay = 800) {
   return ref
 }
 
-function GlitchTitle({ text, accent }) {
+function GlitchTitle({ text, accent, isMobile }) {
+  const titleStyle = {
+    fontFamily: 'var(--font-display)',
+    fontSize: isMobile ? 'clamp(2rem, 10vw, 2.8rem)' : 'clamp(2.8rem, 7vw, 5.5rem)',
+    fontWeight: 900,
+    letterSpacing: '0.08em',
+    lineHeight: 1.05,
+    textTransform: 'uppercase',
+    userSelect: 'none',
+  }
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-        fontWeight: 900,
-        letterSpacing: '0.08em',
+        ...titleStyle,
         color: '#fff',
-        lineHeight: 1.05,
-        textTransform: 'uppercase',
         animation: 'pulseGlow 3s ease-in-out infinite',
         textShadow: `0 0 20px ${accent}, 0 0 60px ${accent}4d`,
-        userSelect: 'none',
         transition: 'text-shadow 0.8s',
       }}>
         {text}
       </h1>
       <h1 aria-hidden style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-        fontWeight: 900,
-        letterSpacing: '0.08em',
+        ...titleStyle,
         color: accent,
-        lineHeight: 1.05,
-        textTransform: 'uppercase',
         position: 'absolute',
         top: 0, left: 0,
         animation: 'glitch-1 6s infinite linear',
         opacity: 0.7,
-        userSelect: 'none',
       }}>{text}</h1>
       <h1 aria-hidden style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-        fontWeight: 900,
-        letterSpacing: '0.08em',
+        ...titleStyle,
         color: '#ff00aa',
-        lineHeight: 1.05,
-        textTransform: 'uppercase',
         position: 'absolute',
         top: 0, left: 0,
         animation: 'glitch-2 6s infinite linear',
         opacity: 0.5,
-        userSelect: 'none',
       }}>{text}</h1>
     </div>
   )
@@ -77,10 +69,12 @@ function StatusBadge({ color, label }) {
         width: 7, height: 7, borderRadius: '50%',
         background: color, boxShadow: `0 0 8px ${color}`,
         animation: 'flicker 3s infinite',
+        flexShrink: 0,
       }} />
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '10px',
         letterSpacing: '0.2em', color: 'rgba(200,216,232,0.5)',
+        whiteSpace: 'nowrap',
       }}>
         {label}
       </span>
@@ -88,10 +82,12 @@ function StatusBadge({ color, label }) {
   )
 }
 
-function CyberButton({ label, accent, primary, href }) {
+function CyberButton({ label, accent, primary, href, isMobile }) {
   const sharedStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: '11px',
-    letterSpacing: '0.25em', padding: '12px 28px',
+    fontFamily: 'var(--font-mono)',
+    fontSize: isMobile ? '10px' : '11px',
+    letterSpacing: '0.25em',
+    padding: isMobile ? '10px 20px' : '12px 28px',
     border: `1px solid ${primary ? accent : 'rgba(200,216,232,0.25)'}`,
     background: primary ? `${accent}14` : 'transparent',
     color: primary ? accent : 'rgba(200,216,232,0.6)',
@@ -170,12 +166,12 @@ function DataPanel({ accent }) {
   )
 }
 
-function BottomBar() {
+function BottomBar({ isMobile }) {
   return (
     <div style={{
       position: 'absolute', bottom: 0, left: 0, right: 0,
-      display: 'flex', justifyContent: 'space-between',
-      padding: '12px 40px',
+      display: 'flex', justifyContent: isMobile ? 'center' : 'space-between',
+      padding: isMobile ? '10px 20px' : '12px 40px',
       borderTop: '1px solid rgba(0,245,255,0.08)',
       background: 'linear-gradient(to top, rgba(3,4,10,0.8) 0%, transparent 100%)',
       zIndex: 100,
@@ -183,9 +179,11 @@ function BottomBar() {
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.2em', color: 'rgba(200,216,232,0.25)' }}>
         © 2025 // ALL_RIGHTS_RESERVED
       </span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.2em', color: 'rgba(200,216,232,0.2)' }}>
-        THREE.JS + R3F // REACT_18 // VITE_5
-      </span>
+      {!isMobile && (
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.2em', color: 'rgba(200,216,232,0.2)' }}>
+          THREE.JS + R3F // REACT_18 // VITE_5
+        </span>
+      )}
     </div>
   )
 }
@@ -194,65 +192,88 @@ export default function HeroOverlay() {
   const { currentScene } = useScene()
   const scene = SCENES[currentScene]
   const accent = scene.accent
+  const isMobile = useIsMobile()
   const subtitleRef = useTypewriter(scene.subtitle, 38, 1000)
 
   return (
     <>
       <div style={{
-        position: 'absolute', left: '40px', bottom: '12vh',
-        zIndex: 100, maxWidth: '620px',
+        position: 'absolute',
+        left: isMobile ? '20px' : '40px',
+        bottom: isMobile ? 'max(150px, 18vh)' : '12vh',
+        right: isMobile ? '20px' : 'auto',
+        zIndex: 100,
+        maxWidth: isMobile ? 'none' : '620px',
         animation: 'fadeUp 1s ease forwards',
         opacity: 0, animationDelay: '0.2s', animationFillMode: 'forwards',
       }}>
-        {/* Status row */}
-        <div style={{ display: 'flex', gap: '24px', marginBottom: '20px' }}>
+        {/* Status badges — single row on mobile, three on desktop */}
+        <div style={{
+          display: 'flex',
+          gap: isMobile ? '14px' : '24px',
+          marginBottom: isMobile ? '14px' : '20px',
+          flexWrap: 'wrap',
+        }}>
           <StatusBadge color="#39ff14" label="SYSTEM_ONLINE" />
-          <StatusBadge color={accent}  label="UNITY_6  //  URP_17" />
+          {!isMobile && <StatusBadge color={accent} label="UNITY_6  //  URP_17" />}
           <StatusBadge color="#ff00aa" label="BENGALURU // IND" />
         </div>
 
-        <GlitchTitle text="ARGHO DAS" accent={accent} />
+        <GlitchTitle text="ARGHO DAS" accent={accent} isMobile={isMobile} />
 
         {/* Subtitle typewriter */}
         <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: '12px',
-          letterSpacing: '0.22em', color: `${accent}b3`,
-          marginTop: '14px', minHeight: '18px',
+          fontFamily: 'var(--font-mono)',
+          fontSize: isMobile ? '10px' : '12px',
+          letterSpacing: '0.18em',
+          color: `${accent}b3`,
+          marginTop: isMobile ? '10px' : '14px',
+          minHeight: '18px',
           transition: 'color 0.8s',
         }}>
           <span ref={subtitleRef} />
           <span style={{ animation: 'blink 1s infinite', color: accent }}>_</span>
         </div>
 
-        {/* Tagline */}
-        <p style={{
-          fontFamily: 'var(--font-body)', fontSize: '1.05rem',
-          fontWeight: 300, color: 'rgba(200,216,232,0.65)',
-          marginTop: '18px', lineHeight: 1.7, maxWidth: '480px',
-          letterSpacing: '0.04em',
-        }}>
-          Building real-time worlds at the intersection of<br />
-          <span style={{ color: accent, fontWeight: 600, transition: 'color 0.8s' }}>rendering performance</span>{' '}
-          and <span style={{ color: 'var(--magenta)', fontWeight: 600 }}>visual craft.</span>
-        </p>
+        {/* Tagline — hidden on mobile to save space */}
+        {!isMobile && (
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: '1.05rem',
+            fontWeight: 300, color: 'rgba(200,216,232,0.65)',
+            marginTop: '18px', lineHeight: 1.7, maxWidth: '480px',
+            letterSpacing: '0.04em',
+          }}>
+            Building real-time worlds at the intersection of<br />
+            <span style={{ color: accent, fontWeight: 600, transition: 'color 0.8s' }}>rendering performance</span>{' '}
+            and <span style={{ color: 'var(--magenta)', fontWeight: 600 }}>visual craft.</span>
+          </p>
+        )}
 
-        <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
+        <div style={{
+          display: 'flex',
+          gap: isMobile ? '12px' : '16px',
+          marginTop: isMobile ? '20px' : '32px',
+        }}>
           <CyberButton
             primary
             accent={accent}
             label="PORTFOLIO"
             href="https://portfolio.arghorithm.com/"
+            isMobile={isMobile}
           />
           <CyberButton
             accent={accent}
             label="GITHUB"
             href="https://github.com/LDL-291"
+            isMobile={isMobile}
           />
         </div>
       </div>
 
-      <DataPanel accent={accent} />
-      <BottomBar />
+      {/* DataPanel — desktop only */}
+      {!isMobile && <DataPanel accent={accent} />}
+
+      <BottomBar isMobile={isMobile} />
     </>
   )
 }
